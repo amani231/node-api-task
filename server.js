@@ -1,16 +1,41 @@
 const express = require('express');
-const mockData = require('./data'); //Importing our data file
 const app = express();
+
+// 1. Use port 3000
 const PORT = 3000;
-// this is a GET Route. when the browser visits '/', it sends a message.
-app.get('/', (request,response) => {
-    response.send("hello! my node.js server is running!");
+
+// 2. Built-in Express middleware to unpack incoming JSON data payloads
+app.use(express.json());
+
+// 3. Mock database array containing the two initial objects
+let books = [
+    { id: 1, title: "Harry Potter" },
+    { id: 2, title: "Lord of the Rings" }
+];
+
+// 4. GET route at '/api/books' that returns the list of all books as JSON
+app.get('/api/books', (req, res) => {
+    res.json(books);
 });
-// this is  an API route.It returns our mock data as JSON.
-app.get('/api/users',(request,response) => {
-    response.json(mockData);
+
+// 5. POST route at '/api/books' that accepts a new book object via req.body,
+//    pushes it into the book array, and returns a plain text string.
+app.post('/api/books', (req, res) => {
+    const newBook = req.body; // Accepts the incoming book object
+    
+    // Quick validation to ensure an object was passed
+    if (!newBook || Object.keys(newBook).length === 0) {
+        return res.status(400).send("Invalid book data");
+    }
+
+    books.push(newBook); // Pushes it into the books array
+    
+    // Returns the exact requested plain text string
+    res.set('Content-Type', 'text/plain');
+    res.send("book added successfully");
 });
-// this tells the server to start listning on door (port)3000
-app.listen(PORT,() =>{
-    console.log('Server is listening on http://localhost:${PORT} ');
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(` Full-Stack Server running on http://localhost:${PORT}`);
 });
